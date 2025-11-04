@@ -1,6 +1,7 @@
 import pygame
 from utils import *
 from objects import raquette, Ball
+import time
 
 def main():
     pygame.init()
@@ -20,7 +21,12 @@ def main():
 
     ball = Ball(x=game_width//2, y=(game_height+HUD_HEIGHT)//2)
 
+    is_ball = True
+    last_deletion = time.time()
+
     while running:
+
+        goal = 0
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -28,19 +34,24 @@ def main():
 
         screen.fill("black")
 
-        goal = ball.check_goal()
+        if is_ball:
+            goal = ball.check_goal()
         
         if goal != 0:
             del ball
+            last_deletion = time.time()
             if goal == 1:
                 score1 += 1
             if goal == 2:
                 score2 += 1
+            is_ball = False
+        if not(is_ball) and time.time() - last_deletion > 1. :
             ball = Ball(x=game_width//2, y=(game_height+HUD_HEIGHT)//2)
-
+            is_ball = True
         player1.handle_input(screen)
         player2.handle_input(screen)
-        ball.handle_input(screen, player1, player2)
+        if is_ball:
+            ball.handle_input(screen, player1, player2)
 
         # === HUD ===
         pygame.draw.rect(screen, 'black', (0, 0, game_width, HUD_HEIGHT))
